@@ -92,19 +92,22 @@ def loss_value_fn(preds, returns, oldvpred):
     return loss.mean()
 
 def test_model(model):
+    model.eval()
     env = gym.make('CartPole-v1')
 
-    score = 0.
+    score = [0.]
 
-    s = env.reset()
-    while True:
-        a = model.action(s)
-        s, r, d, _ = env.step(a)
-        score += r
-        if d:
-            break
+    for _ in range(20):
+        s = env.reset()
+        while True:
+            a = model.action(s)
+            s, r, d, _ = env.step(a)
+            score[-1] += r
+            if d:
+                score.append(0.)
+                break
 
-    return score
+    return np.mean(score)
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
